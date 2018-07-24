@@ -46,6 +46,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
+        <!-- Neo4j -->
+        <dependency>
+            <groupId>org.neo4j.driver</groupId>
+            <artifactId>neo4j-java-driver</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
