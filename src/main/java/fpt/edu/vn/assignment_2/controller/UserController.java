@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -55,5 +56,16 @@ public class UserController {
         }
         User user = userRepository.findUserByUsernameAndPassword(username, password);
         return (user != null && user.getUsername().equals(username) && user.getPassword().equals(password));
+    }
+
+    @PostMapping("/getUsersByEg")
+    public List<User> getUsersByEg(@RequestBody User sampleUser) {
+        if (sampleUser == null) {
+            return null;
+        }
+        //sampleUser.toExample();
+        Example<User> example = Example.of(sampleUser);
+        List<User> users = userRepository.findAll(example);
+        return users;
     }
 }

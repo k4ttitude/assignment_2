@@ -17,6 +17,13 @@ public class File {
         this.data = data;
     }
 
+    public void toExample() {
+        if (type == null) type = "";
+        if (extension == null) extension = "";
+        if (encode == null) encode = "";
+        if (data == null) data = "";
+    }
+
     public String getType() {
         return type;
     }
