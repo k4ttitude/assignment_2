@@ -9,20 +9,29 @@ public class User {
     @Id
     private String id;
 
-    private String firstName;
-    private String lastName;
+    private String username;
+    private String password;
+    private String name;
+    private String type_id;
+//    private String avatar;
+
+    private File avatar;
 
     public User() {
     }
 
-    public User(String firstName, String lastName) {
-        this.firstName = firstName;
-        this.lastName = lastName;
+    public User(String username, String password, String name, String type_id, File avatar) {
+        this.username = username;
+        this.password = password;
+        this.name = name;
+        this.type_id = type_id;
+        this.avatar = avatar;
     }
 
     @Override
     public String toString() {
-        return String.format("User { id: '%s', firstName: '%s', lastName: '%s' }", id, firstName, lastName);
+        return String.format("User { id: '%s', username: '%s', password: '%s', name: '%s' }",
+                id, username, password, name);
     }
 
     public String getId() {
@@ -33,19 +42,43 @@ public class User {
         this.id = id;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getUsername() {
+        return username;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getPassword() {
+        return password;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getType_id() {
+        return type_id;
+    }
+
+    public void setType_id(String type_id) {
+        this.type_id = type_id;
+    }
+
+    public File getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(File avatar) {
+        this.avatar = avatar;
     }
 }
