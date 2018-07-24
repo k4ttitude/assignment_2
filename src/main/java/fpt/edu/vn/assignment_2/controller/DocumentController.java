@@ -34,4 +34,14 @@ public class DocumentController {
         return documentRepository.findAll(Example.of(document));
     }
 
+    @PutMapping("/saveDocument")
+    public void saveDocument(@RequestBody Document document) {
+        if (document == null) {
+            return;
+            // return false;
+        }
+        documentRepository.save(document);
+        // return true;
+    }
+
 }
