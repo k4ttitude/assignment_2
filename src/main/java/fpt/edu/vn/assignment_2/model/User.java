@@ -28,6 +28,14 @@ public class User {
         this.avatar = avatar;
     }
 
+    public void toExample() {
+        if (username == null) username = "";
+        if (password == null) password = "";
+        if (name == null) name = "";
+        if (type_id == null) type_id = "";
+        if (avatar == null) avatar = new File();
+    }
+
     @Override
     public String toString() {
         return String.format("User { id: '%s', username: '%s', password: '%s', name: '%s' }",
