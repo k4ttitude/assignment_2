@@ -1,7 +1,9 @@
 package fpt.edu.vn.assignment_2.dao.neo4j;
 
+import fpt.edu.vn.assignment_2.model.Comment;
 import org.neo4j.driver.v1.*;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,20 +16,10 @@ public class NeoConnect implements AutoCloseable {
     private final String INVITE_FRIEND = "FRIEND_OF";
     private final String HAS_DOCUMENT = "HAS_DOCUMENT";
     private final String LIKE_BY = "LIKE_BY";
-    private final String RATE_BY = "RATE_BY";
     private final String COMMENT_BY = "COMMENT_BY";
 
-
-    private static void main(String[] args) throws Exception {
-        NeoConnect model = new NeoConnect(NEO4J_URI, NEO4J_NAME, NEO4J_PASSWORD);
-        for (String s : model.getFriendsList("111")) {
-            System.out.println(s);
-        }
-        model.close();
-    }
-
-    public NeoConnect(String uri, String user, String password) {
-        driver = GraphDatabase.driver(uri, AuthTokens.basic(user, password));
+    public NeoConnect() {
+        this.driver = GraphDatabase.driver(NEO4J_URI, AuthTokens.basic(NEO4J_NAME, NEO4J_PASSWORD));
     }
 
     public void close() throws Exception {
@@ -116,7 +108,7 @@ public class NeoConnect implements AutoCloseable {
         }
     }
 
-    //List Book of User
+    //List doc of User
     public List<String> getOwnerBooksList(String userId) {
         List<String> list = new ArrayList<>();
         try (Session session = driver.session()) {
@@ -135,35 +127,96 @@ public class NeoConnect implements AutoCloseable {
         return list;
     }
 
-    public void likeADocument(String ownerId, String docId) {
+    //Like a doc
+    public void likeADocument(String userId, String docId) {
         // Sessions are lightweight and disposable connection wrappers.
         try (Session session = driver.session()) {
             // Wrapping Cypher in an explicit transaction provides atomicity
             // and makes handling errors much easier.
             try (Transaction tx = session.beginTransaction()) {
                 tx.run("MATCH (a:Document {id: $docId}) " +
-                                "MATCH (b:User {id: $ownerId}) " +
+                                "MATCH (b:User {id: $userId}) " +
                                 "MERGE (a)-[:" + LIKE_BY + "]->(b)",
-                        Values.parameters("docId", docId, "ownerId", ownerId));
+                        Values.parameters("docId", docId, "userId", userId));
                 tx.success();  // Mark this write as successful.
             }
         }
     }
 
-    public void unlikeADocument(String ownerId, String docId) {
+    //unlike A doc
+    public void unlikeADocument(String userId, String docId) {
         // Sessions are lightweight and disposable connection wrappers.
+        try (Session session = driver.session()) {
+            // Wrapping Cypher in an explicit transaction provides atomicity
+            // and makes handling errors much easier.
+            try (Transaction tx = session.beginTransaction()) {
+                tx.run("MATCH (a:Document)-[r:" + LIKE_BY + "]" +
+                                "->(b:User) WHERE a.id = {docId} AND b.id = {userId} DELETE r",
+                        Values.parameters("docId", docId, "ownerId", userId));
+                tx.success();  // Mark this write as successful.
+            }
+        }
+    }
+
+    //List all users who like the doc
+    public List<String> getUsersLikeDocument(String docId) {
+        List<String> list = new ArrayList<>();
+        try (Session session = driver.session()) {
+            // Wrapping Cypher in an explicit transaction provides atomicity
+            // and makes handling errors much easier.
+            try (Transaction tx = session.beginTransaction()) {
+                StatementResult result = tx.run("MATCH (a:Document)-[:" + LIKE_BY + "]->(b:User) " +
+                        "WHERE a.id = {docId} return a.id, b.id", Values.parameters("docId", docId));
+                while (result.hasNext()) {
+                    Record record = result.next();
+                    list.add(record.get("b.id").asString());
+                }
+                tx.success();  // Mark this write as successful.
+            }
+        }
+        return list;
+    }
+
+    //Comment a doc
+    public void commentADocument(Comment c) {
+        // Sessions are lightweight and disposable connection wrappers.
+        Timestamp ts = new Timestamp(System.currentTimeMillis());
+
         try (Session session = driver.session()) {
             // Wrapping Cypher in an explicit transaction provides atomicity
             // and makes handling errors much easier.
             try (Transaction tx = session.beginTransaction()) {
                 tx.run("MATCH (a:Document {id: $docId}) " +
                                 "MATCH (b:User {id: $ownerId}) " +
-                                "MERGE (a)-[:" + LIKE_BY + "]->(b)",
-                        Values.parameters("docId", docId, "ownerId", ownerId));
+                                "MERGE (a)-[:" + COMMENT_BY + "{content:{content}, time:{time}}]->(b)",
+                        Values.parameters("docId", c.getDocId(), "ownerId", c.getUserId(),
+                                "content", c.getContent(), "time", ts.getTime()));
                 tx.success();  // Mark this write as successful.
             }
         }
     }
+
+    //List all the comment on this Doc
+    public List<Comment> getCommentsOnDocument(String docId) {
+        List<Comment> list = new ArrayList<>();
+        try (Session session = driver.session()) {
+            // Wrapping Cypher in an explicit transaction provides atomicity
+            // and makes handling errors much easier.
+            try (Transaction tx = session.beginTransaction()) {
+
+                StatementResult result = tx.run("MATCH (a:Document)-[r:" + COMMENT_BY + "]->(b:User) " +
+                        "WHERE a.id = {docId} return r.time as time, r.content as content, b.id as id", Values.parameters("docId", docId));
+                while (result.hasNext()) {
+                    Record record = result.next();
+                    list.add(new Comment(record.get("id").asString(), docId,
+                            record.get("content").asString(), record.get("time").asLong()));
+                }
+                tx.success();  // Mark this write as successful.
+            }
+        }
+        return list;
+    }
+
 }
 
 

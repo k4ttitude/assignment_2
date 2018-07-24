@@ -1,24 +1,16 @@
 package fpt.edu.vn.assignment_2.model;
 
-import java.sql.Timestamp;
-
 public class Comment {
     private String userId;
     private String docId;
-    private Timestamp time;
+    private String content;
+    private long time;//in TimeStamp
 
-    public Comment(String userId, String docId, Timestamp time) {
+    public Comment(String userId, String docId, String content, long time) {
         this.userId = userId;
         this.docId = docId;
+        this.content = content;
         this.time = time;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 
     public String getDocId() {
@@ -29,11 +21,28 @@ public class Comment {
         this.docId = docId;
     }
 
-    public Timestamp getTime() {
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public long getTime() {
         return time;
     }
 
-    public void setTime(Timestamp time) {
+    public void setTime(long time) {
         this.time = time;
     }
 }
+
