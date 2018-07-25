@@ -10,9 +10,9 @@ import java.util.List;
 public class NeoConnect implements AutoCloseable {
 
     private final Driver driver;
-    private static final String NEO4J_URI = "bolt://localhost:7687";
-    private static final String NEO4J_NAME = "neo4j";
-    private static final String NEO4J_PASSWORD = "123456";
+    private static final String NEO4J_URI = "bolt://hobby-oelpenmafcjcgbkejkdkolbl.dbs.graphenedb.com:24786";
+    private static final String NEO4J_NAME = "baonq";
+    private static final String NEO4J_PASSWORD = "b.i7gNLOv11u7P.y9SdWb7DciMVUWd0";
     private final String INVITE_FRIEND = "FRIEND_OF";
     private final String HAS_DOCUMENT = "HAS_DOCUMENT";
     private final String LIKE_BY = "LIKE_BY";
@@ -31,7 +31,7 @@ public class NeoConnect implements AutoCloseable {
     public static void main(String[] args) {
         try {
             NeoConnect neo = new NeoConnect();
-            neo.insertUser("1");
+            System.out.println("Neo Connected");
             neo.close();
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -298,17 +298,6 @@ public class NeoConnect implements AutoCloseable {
         }
 
         return totalScore * 1.0 / ratedTime;
-    }
-
-    public static void main(String[] args) throws Exception {
-        NeoConnect neo = new NeoConnect();
-        neo.rateADocument("111", "111", 2);
-        neo.rateADocument("1", "111", 2);
-        System.out.println("Rated score turn 1: " + neo.getRateOfDocument("111"));
-        neo.rateADocument("1", "111", 1);
-        System.out.println("Rated score turn 2: " + neo.getRateOfDocument("111"));
-
-        neo.close();
     }
 
 }
