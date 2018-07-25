@@ -35,13 +35,12 @@ public class DocumentController {
     }
 
     @PutMapping("/saveDocument")
-    public void saveDocument(@RequestBody Document document) {
+    public boolean saveDocument(@RequestBody Document document) {
         if (document == null) {
-            return;
-            // return false;
+            return false;
         }
         documentRepository.save(document);
-        // return true;
+         return true;
     }
 
 }

@@ -68,4 +68,13 @@ public class UserController {
         List<User> users = userRepository.findAll(example);
         return users;
     }
+
+    @PutMapping("/saveUser")
+    public boolean saveUser(@RequestBody User user) {
+        if (user == null) {
+            return false;
+        }
+        userRepository.save(user);
+        return true;
+    }
 }

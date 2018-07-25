@@ -12,7 +12,7 @@ public class NeoConnect implements AutoCloseable {
     private final Driver driver;
     private static final String NEO4J_URI = "bolt://localhost:7687";
     private static final String NEO4J_NAME = "neo4j";
-    private static final String NEO4J_PASSWORD = "mockiembinh";
+    private static final String NEO4J_PASSWORD = "123456";
     private final String INVITE_FRIEND = "FRIEND_OF";
     private final String HAS_DOCUMENT = "HAS_DOCUMENT";
     private final String LIKE_BY = "LIKE_BY";
@@ -26,6 +26,16 @@ public class NeoConnect implements AutoCloseable {
 
     public void close() throws Exception {
         driver.close();
+    }
+
+    public static void main(String[] args) {
+        try {
+            NeoConnect neo = new NeoConnect();
+            neo.insertUser("1");
+            neo.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     //For Users
