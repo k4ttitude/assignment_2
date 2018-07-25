@@ -221,7 +221,7 @@ public class NeoConnect implements AutoCloseable {
 
     //For rating
     public void rateADocument(String userId, String docId, int score) {
-        if (!isRatedDocument(userId, docId)) {
+        if (isRatedDocument(userId, docId)) {
             deleteRatedDocument(userId, docId);
         }
         try (Session session = driver.session()) {
@@ -258,16 +258,13 @@ public class NeoConnect implements AutoCloseable {
                 StatementResult result = tx.run("MATCH (a:Document)-[r:" + RATE_BY + "]->(b:User) " +
                                 "WHERE a.id = {docId} AND b.id = {userId} return r",
                         Values.parameters("docId", docId, "userId", userId));
-                System.out.println("Doc: " + docId + "User: " + userId);
                 while (result.hasNext()) {
-                    System.out.println("False");
-                    return false;
+                    return true;
                 }
                 tx.success();  // Mark this write as successful.
             }
         }
-        System.out.println("True");
-        return true;
+        return false;
     }
 
     public Double getRateOfDocument(String docId) {
