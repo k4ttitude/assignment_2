@@ -17,6 +17,8 @@ public class NeoConnect implements AutoCloseable {
     private final String HAS_DOCUMENT = "HAS_DOCUMENT";
     private final String LIKE_BY = "LIKE_BY";
     private final String COMMENT_BY = "COMMENT_BY";
+    private final String RATE_BY = "RATE_BY";
+
 
     public NeoConnect() {
         this.driver = GraphDatabase.driver(NEO4J_URI, AuthTokens.basic(NEO4J_NAME, NEO4J_PASSWORD));
@@ -215,6 +217,91 @@ public class NeoConnect implements AutoCloseable {
             }
         }
         return list;
+    }
+
+    //For rating
+    public void rateADocument(String userId, String docId, int score) {
+        if (!isRatedDocument(userId, docId)) {
+            deleteRatedDocument(userId, docId);
+        }
+        try (Session session = driver.session()) {
+            // Wrapping Cypher in an explicit transaction provides atomicity
+            // and makes handling errors much easier.
+            try (Transaction tx = session.beginTransaction()) {
+                tx.run("MATCH (a:Document {id: $docId}) " +
+                                "MATCH (b:User {id: $userId}) " +
+                                "MERGE (a)-[r:" + RATE_BY + "{score:{score}}]->(b)",
+                        Values.parameters("docId", docId, "userId", userId, "score", score));
+                tx.success();  // Mark this write as successful.
+            }
+        }
+    }
+
+    private void deleteRatedDocument(String userId, String docId) {
+        try (Session session = driver.session()) {
+            // Wrapping Cypher in an explicit transaction provides atomicity
+            // and makes handling errors much easier.
+            try (Transaction tx = session.beginTransaction()) {
+                tx.run("MATCH (a:Document {id:{docId}})-[r:" + RATE_BY + "]->(b:User {id:{userId}}) DELETE r",
+                        Values.parameters("docId", docId, "userId", userId));
+                tx.success();  // Mark this write as successful.
+            }
+        }
+    }
+
+    private boolean isRatedDocument(String userId, String docId) {
+        try (Session session = driver.session()) {
+            // Wrapping Cypher in an explicit transaction provides atomicity
+            // and makes handling errors much easier.
+
+            try (Transaction tx = session.beginTransaction()) {
+                StatementResult result = tx.run("MATCH (a:Document)-[r:" + RATE_BY + "]->(b:User) " +
+                                "WHERE a.id = {docId} AND b.id = {userId} return r",
+                        Values.parameters("docId", docId, "userId", userId));
+                System.out.println("Doc: " + docId + "User: " + userId);
+                while (result.hasNext()) {
+                    System.out.println("False");
+                    return false;
+                }
+                tx.success();  // Mark this write as successful.
+            }
+        }
+        System.out.println("True");
+        return true;
+    }
+
+    public Double getRateOfDocument(String docId) {
+        int ratedTime = 0;
+        int totalScore = 0;
+        try (Session session = driver.session()) {
+            // Wrapping Cypher in an explicit transaction provides atomicity
+            // and makes handling errors much easier.
+
+            try (Transaction tx = session.beginTransaction()) {
+
+                StatementResult result = tx.run("MATCH (a:Document)-[r:" + RATE_BY + "]->(b:User) " +
+                        "WHERE a.id = {docId} return r.score as score", Values.parameters("docId", docId));
+                while (result.hasNext()) {
+                    Record record = result.next();
+                    totalScore += record.get("score").asInt();
+                    ratedTime++;
+                }
+                tx.success();  // Mark this write as successful.
+            }
+        }
+
+        return totalScore * 1.0 / ratedTime;
+    }
+
+    public static void main(String[] args) throws Exception {
+        NeoConnect neo = new NeoConnect();
+        neo.rateADocument("111", "111", 2);
+        neo.rateADocument("1", "111", 2);
+        System.out.println("Rated score turn 1: " + neo.getRateOfDocument("111"));
+        neo.rateADocument("1", "111", 1);
+        System.out.println("Rated score turn 2: " + neo.getRateOfDocument("111"));
+
+        neo.close();
     }
 
 }

@@ -5,8 +5,26 @@ import org.bson.internal.Base64;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class Utils {
+
+    /**
+     * Gets timestamp in millis and converts it to HH:mm (e.g. 16:44).
+     */
+    public static String formatTime(long timeInMillis) {
+        Timestamp ts = new Timestamp(System.currentTimeMillis());
+        SimpleDateFormat formatCheck = new SimpleDateFormat("MM/dd/yyyy");
+        String format = "HH:mm";
+        if (!formatCheck.format(timeInMillis).equals(formatCheck.format(ts.getTime()))) {
+            format = "dd/MM HH:mm";
+        }
+        SimpleDateFormat dateFormat = new SimpleDateFormat(format, Locale.getDefault());
+        return dateFormat.format(timeInMillis);
+    }
+
     /**
      * Get Image from text
      */
