@@ -1,6 +1,7 @@
 package fpt.edu.vn.assignment_2.controller;
 
 import fpt.edu.vn.assignment_2.dao.mongo.UserRepository;
+import fpt.edu.vn.assignment_2.dao.neo4j.NeoConnect;
 import fpt.edu.vn.assignment_2.model.User;
 import fpt.edu.vn.assignment_2.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ import java.util.List;
 @CrossOrigin
 @RequestMapping("/user")
 public class UserController {
+
+    private NeoConnect neoConnect;
 
     @Autowired
     UserRepository userRepository;
@@ -54,8 +57,12 @@ public class UserController {
         if (username == null || password == null) {
             return false;
         }
-        User user = userRepository.findUserByUsernameAndPassword(username, password);
-        return (user != null && user.getUsername().equals(username) && user.getPassword().equals(password));
+        try {
+            User user = userRepository.findUserByUsernameAndPassword(username, password);
+            return (user != null && user.getUsername().equals(username) && user.getPassword().equals(password));
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
     @PostMapping("/getUsersByEg")
@@ -74,7 +81,25 @@ public class UserController {
         if (user == null) {
             return false;
         }
+
+        // Create User
+        if (user.getId() == null || userRepository.findById(user.getId()) == null) {
+            return createUser(user);
+        }
+
+        // Update user
         userRepository.save(user);
         return true;
+    }
+
+    private boolean createUser(User user) {
+        if (userRepository.findAll(Example.of(user)).size() == 0) {
+            user = userRepository.save(user);
+            // Add userId to Neo4j
+            this.neoConnect = new NeoConnect();
+            neoConnect.insertUser(user.getId());
+            return true;
+        }
+        return false;
     }
 }

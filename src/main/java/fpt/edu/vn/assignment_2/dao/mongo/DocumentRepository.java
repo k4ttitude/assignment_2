@@ -8,4 +8,6 @@ import java.util.List;
 public interface DocumentRepository extends MongoRepository<Document, String> {
 
     public List<Document> findAllByAuthorId(String authorId);
+
+    public List<Document> findAllByTitleContains(String title);
 }

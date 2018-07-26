@@ -11,8 +11,8 @@ public class NeoConnect implements AutoCloseable {
 
     private final Driver driver;
     private static final String NEO4J_URI = "bolt://hobby-oelpenmafcjcgbkejkdkolbl.dbs.graphenedb.com:24786";
-    private static final String NEO4J_NAME = "baonq";
-    private static final String NEO4J_PASSWORD = "b.i7gNLOv11u7P.y9SdWb7DciMVUWd0";
+    private static final String NEO4J_NAME = "hieupm";
+    private static final String NEO4J_PASSWORD = "b.H5fU1xGWLHMT.POGMW5rsKeo2R42Z";
     private final String INVITE_FRIEND = "FRIEND_OF";
     private final String HAS_DOCUMENT = "HAS_DOCUMENT";
     private final String LIKE_BY = "LIKE_BY";
@@ -101,7 +101,7 @@ public class NeoConnect implements AutoCloseable {
     }
 
     // Create a friendship between two people.
-    private boolean makeFriends(String user1Id, String user2Id) {
+    public boolean makeFriends(String user1Id, String user2Id) {
         if (isFriend(user1Id, user2Id)) {
             return false;
         }
@@ -144,7 +144,7 @@ public class NeoConnect implements AutoCloseable {
     }
 
     //Unfriend
-    private void unFriend(String userId1, String userId2) {
+    public void unFriend(String userId1, String userId2) {
         try (Session session = driver.session()) {
             // Wrapping Cypher in an explicit transaction provides atomicity
             // and makes handling errors much easier.

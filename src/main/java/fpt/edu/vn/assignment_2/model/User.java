@@ -13,7 +13,6 @@ public class User {
     private String password;
     private String name;
     private String type_id;
-//    private String avatar;
 
     private File avatar;
 
@@ -89,4 +88,5 @@ public class User {
     public void setAvatar(File avatar) {
         this.avatar = avatar;
     }
+
 }
